@@ -28,8 +28,14 @@ import modules.images as images
 import modules.styles
 import modules.sd_models as sd_models
 import modules.sd_vae as sd_vae
-from ldm.data.util import AddMiDaS
-from ldm.models.diffusion.ddpm import LatentDepth2ImageDiffusion
+try:
+    from ldm.data.util import AddMiDaS
+except ImportError:
+    AddMiDaS = None  # 部分 stable-diffusion fork 无 ldm.data.util
+try:
+    from ldm.models.diffusion.ddpm import LatentDepth2ImageDiffusion
+except ImportError:
+    LatentDepth2ImageDiffusion = None  # 部分 fork 无深度图模型
 
 from einops import repeat, rearrange
 from blendmodes.blend import blendLayers, BlendType
@@ -302,6 +308,8 @@ class StableDiffusionProcessing:
         return txt2img_image_conditioning(self.sd_model, x, width or self.width, height or self.height)
 
     def depth2img_image_conditioning(self, source_image):
+        if AddMiDaS is None:
+            raise RuntimeError("Depth2Img requires ldm.data.util.AddMiDaS (not available in this stable-diffusion fork).")
         # Use the AddMiDaS helper to Format our source image to suit the MiDaS model
         transformer = AddMiDaS(model_type="dpt_hybrid")
         transformed = transformer({"jpg": rearrange(source_image[0], "c h w -> h w c")})
@@ -377,7 +385,7 @@ class StableDiffusionProcessing:
 
         # HACK: Using introspection as the Depth2Image model doesn't appear to uniquely
         # identify itself with a field common to all models. The conditioning_key is also hybrid.
-        if isinstance(self.sd_model, LatentDepth2ImageDiffusion):
+        if LatentDepth2ImageDiffusion is not None and isinstance(self.sd_model, LatentDepth2ImageDiffusion):
             return self.depth2img_image_conditioning(source_image)
 
         if self.sd_model.cond_stage_key == "edit":

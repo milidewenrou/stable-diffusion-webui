@@ -10,7 +10,6 @@ import re
 import safetensors.torch
 from omegaconf import OmegaConf, ListConfig
 from urllib import request
-import ldm.modules.midas as midas
 
 from modules import paths, shared, modelloader, devices, script_callbacks, sd_vae, sd_disable_initialization, errors, hashes, sd_models_config, sd_unet, sd_models_xl, cache, extra_networks, processing, lowvram, sd_hijack, patches
 from modules.timer import Timer
@@ -548,6 +547,11 @@ def enable_midas_autodownload():
     This function applies a wrapper to download the model to the correct
     location automatically.
     """
+    try:
+        import ldm.modules.midas as midas
+    except ImportError:
+        # 部分 stable-diffusion 仓库（如 milidewenrou 等 fork）未包含 midas 模块，跳过即可
+        return
 
     midas_path = os.path.join(paths.models_path, 'midas')
 

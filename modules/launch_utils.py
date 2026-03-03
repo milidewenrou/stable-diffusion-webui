@@ -350,12 +350,14 @@ def prepare_environment():
     stable_diffusion_xl_repo = os.environ.get('STABLE_DIFFUSION_XL_REPO', "https://github.com/milidewenrou/generative-models.git")
     k_diffusion_repo = os.environ.get('K_DIFFUSION_REPO', 'https://github.com/milidewenrou/k-diffusion.git')
     blip_repo = os.environ.get('BLIP_REPO', 'https://github.com/salesforce/BLIP.git')
+    taming_transformers_repo = os.environ.get('TAMING_TRANSFORMERS_REPO', 'https://github.com/CompVis/taming-transformers.git')
 
     assets_commit_hash = os.environ.get('ASSETS_COMMIT_HASH', "6f7db241d2f8ba7457bac5ca9753331f0c266917")
     stable_diffusion_commit_hash = os.environ.get('STABLE_DIFFUSION_COMMIT_HASH', "cf1d67a6fd5ea1aa600c4df58e5b47da45f6bdbf")
     stable_diffusion_xl_commit_hash = os.environ.get('STABLE_DIFFUSION_XL_COMMIT_HASH', "45c443b316737a4ab6e40413d7794a7f5657c19f")
     k_diffusion_commit_hash = os.environ.get('K_DIFFUSION_COMMIT_HASH', "ab527a9a6d347f364e3d185ba6d714e22d80cb3c")
     blip_commit_hash = os.environ.get('BLIP_COMMIT_HASH', "48211a1594f1321b00f14c9f7a5b4813144b2fb9")
+    taming_commit_hash = os.environ.get('TAMING_COMMIT_HASH', "24268930bf1dce879235a7fddd0b2355b84d7ea6")
 
     try:
         # the existence of this file is a signal to webui.sh/bat that webui needs to be restarted when it stops execution
@@ -413,6 +415,9 @@ def prepare_environment():
     git_clone(stable_diffusion_xl_repo, repo_dir('generative-models'), "Stable Diffusion XL", stable_diffusion_xl_commit_hash)
     git_clone(k_diffusion_repo, repo_dir('k-diffusion'), "K-diffusion", k_diffusion_commit_hash)
     git_clone(blip_repo, repo_dir('BLIP'), "BLIP", blip_commit_hash)
+    taming_dir = repo_dir('taming-transformers')
+    if not os.path.isfile(os.path.join(taming_dir, 'taming', 'modules', 'vqvae', 'quantize.py')):
+        git_clone(taming_transformers_repo, taming_dir, "Taming Transformers", taming_commit_hash)
 
     startup_timer.record("clone repositores")
 
